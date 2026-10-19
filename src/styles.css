@@ -1,0 +1,62 @@
+:root { --rosa:#ff6b6b; --sol:#ffb703; --cielo:#4cc9f0; --verde:#25d366; --ink:#2b2d42; }
+* { box-sizing: border-box; margin: 0; }
+body { font-family: Nunito, sans-serif; color: var(--ink); background: #fffaf0; }
+button { font: inherit; cursor: pointer; border: 0; }
+
+.top { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 5vw; background: #fff; box-shadow: 0 2px 12px #0001; }
+.logo { font: 800 1.6rem 'Baloo 2'; color: var(--rosa); }
+.cartbtn { background: var(--sol); padding: 8px 16px; border-radius: 99px; font-size: 1.1rem; }
+
+.hero { text-align: center; padding: 56px 5vw 32px; background: linear-gradient(135deg, #ffe5ec, #fff3c4 50%, #d8f3ff); }
+.hero h1 { font: 800 clamp(2rem, 6vw, 3.4rem)/1.1 'Baloo 2'; }
+.hero h1 span { color: var(--rosa); }
+.hero p { margin: 12px 0 22px; font-size: 1.1rem; }
+.hero input { width: min(520px, 100%); padding: 14px 22px; border-radius: 99px; border: 3px solid #fff;
+  box-shadow: 0 6px 20px #0002; font: inherit; outline: none; }
+.hero input:focus { border-color: var(--cielo); }
+
+.chips { display: flex; gap: 10px; overflow-x: auto; padding: 20px 5vw; }
+.chips button { white-space: nowrap; padding: 10px 18px; border-radius: 99px; background: #fff; font-weight: 700;
+  box-shadow: 0 2px 8px #0001; transition: .2s; }
+.chips button.on, .chips button:hover { background: var(--cielo); color: #fff; transform: translateY(-2px); }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 22px; padding: 10px 5vw 60px; }
+.msg { grid-column: 1/-1; text-align: center; padding: 40px; }
+.card { background: #fff; border-radius: 24px; overflow: hidden; box-shadow: 0 6px 20px #0001; transition: .25s; display: flex; flex-direction: column; }
+.card:hover { transform: translateY(-6px) rotate(-.5deg); box-shadow: 0 14px 30px #0002; }
+.thumb { position: relative; height: 190px; display: grid; place-items: center; font-size: 4.5rem; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb em { position: absolute; top: 12px; left: 12px; font: 700 .75rem Nunito; color: #fff; padding: 4px 12px; border-radius: 99px; }
+.info { padding: 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.info h3 { font: 700 1.2rem 'Baloo 2'; }
+.info p { font-size: .9rem; color: #555; }
+.info small { color: #888; }
+.row { display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: 8px; }
+.row strong { font: 800 1.3rem 'Baloo 2'; color: var(--rosa); }
+.precio small { display: block; color: #2a9d5b; font-weight: 700; }
+.add { width: 100%; margin-top: 10px; background: var(--rosa); color: #fff; padding: 11px; border-radius: 14px; font-weight: 800; transition: .2s; }
+.add:hover { background: #ff4f4f; transform: scale(1.02); }
+.clear { width: 100%; margin-top: 8px; padding: 10px; border-radius: 14px; background: #fff; color: #d62828; border: 2px solid #ffd6d6; font-weight: 700; }
+.clear:hover:not(:disabled) { background: #ffeded; }
+.clear:disabled { opacity: .4; cursor: not-allowed; }
+
+footer { text-align: center; padding: 28px; background: var(--ink); color: #fff; }
+.fab { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 20; background: var(--verde);
+  color: #fff; padding: 14px 28px; border-radius: 99px; font-weight: 800; box-shadow: 0 8px 24px #0004; }
+
+.overlay { position: fixed; inset: 0; background: #0006; z-index: 30; }
+.drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(400px, 100%); background: #fff; z-index: 40;
+  display: flex; flex-direction: column; transform: translateX(100%); transition: .3s; }
+.drawer.open { transform: none; }
+.dh { display: flex; justify-content: space-between; align-items: center; padding: 18px; background: var(--sol); }
+.dh h2 { font: 800 1.5rem 'Baloo 2'; }
+.dh button { background: #fff; width: 36px; height: 36px; border-radius: 50%; }
+.dl { flex: 1; overflow-y: auto; padding: 12px 18px; }
+.li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px dashed #ddd; }
+.li small { display: block; color: #888; }
+.qty { display: flex; align-items: center; gap: 10px; }
+.qty button { width: 30px; height: 30px; border-radius: 50%; background: #ffe5ec; font-weight: 800; }
+.df { padding: 18px; border-top: 2px solid #eee; }
+.wa { width: 100%; margin-top: 12px; padding: 14px; border-radius: 14px; background: var(--verde); color: #fff; font-weight: 800; font-size: 1rem; }
+.wa:disabled { opacity: .5; cursor: not-allowed; }
