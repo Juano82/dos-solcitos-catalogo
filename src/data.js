@@ -57,11 +57,12 @@ export async function cargarProductos() {
       categoria: categoriaDe(nombre),
       precio: monto(col(o, 'precio de venta')),
       efectivo: monto(col(o, 'precio efectivo')),
-      imagen: col(o, 'imagen', 'foto'),
+      imagen: '',
       descripcion: '',
       talles: [],
     }
     if (talle && !g.talles.includes(talle)) g.talles.push(talle)
+    if (!g.imagen) g.imagen = urlImagen(col(o, 'foto', 'imagen'))
     g.stock = (g.stock || 0) + cantidad
     grupos.set(nombre, g)
   })
@@ -71,6 +72,12 @@ export async function cargarProductos() {
 function categoriaDe(nombre) {
   const w = nombre.split(' ')[0].toLowerCase().replace(/s$/, '')
   return w.charAt(0).toUpperCase() + w.slice(1)
+}
+
+// Convierte links de Google Drive en una URL de imagen mostrable
+function urlImagen(url) {
+  const m = url.match(/\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/)
+  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800` : url
 }
 
 // Acepta el link de "compartir" de Google Sheets y lo convierte a CSV
