@@ -4,8 +4,10 @@ body { font-family: Nunito, sans-serif; color: var(--ink); background: #fffaf0; 
 button { font: inherit; cursor: pointer; border: 0; }
 
 .top { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
-  padding: 12px 5vw; background: #fff; box-shadow: 0 2px 12px #0001; }
-.logo { font: 800 1.6rem 'Baloo 2'; color: var(--rosa); }
+  padding: 6px 5vw; background: #fff; box-shadow: 0 2px 12px #0001; }
+.logo { display: flex; align-items: center; }
+.logo img { height: 84px; width: auto; display: block; }
+@media (max-width: 600px) { .logo img { height: 68px; } }
 .cartbtn { background: var(--sol); padding: 8px 16px; border-radius: 99px; font-size: 1.1rem; }
 
 .hero { text-align: center; padding: 56px 5vw 32px; background: linear-gradient(135deg, #ffe5ec, #fff3c4 50%, #d8f3ff); }

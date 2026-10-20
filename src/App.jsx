@@ -78,7 +78,7 @@ export default function App() {
   return (
     <>
       <header className="top">
-        <div className="logo">☀️ {NEGOCIO}</div>
+        <a className="logo" href="./" aria-label={NEGOCIO}><img src="./logo.png" alt={NEGOCIO} /></a>
         <button className="cartbtn" onClick={() => setAbierto(true)}>🛒 <b>{cantidad}</b></button>
       </header>
 
