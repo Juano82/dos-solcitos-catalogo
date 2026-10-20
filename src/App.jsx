@@ -7,13 +7,18 @@ const COLORES = ['#ff6b6b', '#ffb703', '#4cc9f0', '#80ed99', '#b388ff', '#ff8fab
 const EMOJIS = { Bebés: '🍼', Niños: '👕', Calzado: '👟', Accesorios: '🎒',
   Body: '🍼', Remera: '👕', Conjunto: '👚', Pantalon: '👖', Chomba: '👔' }
 
-function Card({ p, onAdd }) {
+function Card({ p, onAdd, onZoom }) {
   const color = COLORES[p.id % COLORES.length]
   return (
     <article className="card">
-      <div className="thumb" style={{ background: `${color}33` }}>
+      <div
+        className={`thumb ${p.imagen ? 'zoomable' : ''}`}
+        style={{ background: `${color}33` }}
+        onClick={() => p.imagen && onZoom(p)}
+      >
         {p.imagen ? <img src={p.imagen} alt={p.nombre} loading="lazy" /> : <span>{EMOJIS[p.categoria] || '⭐'}</span>}
         <em style={{ background: color }}>{p.categoria}</em>
+        {p.imagen && <i className="lupa">🔍</i>}
       </div>
       <div className="info">
         <h3>{p.nombre}</h3>
@@ -21,6 +26,7 @@ function Card({ p, onAdd }) {
         {p.talle && <small>Talles: {p.talle}</small>}
         <div className="precio">
           <strong>{peso(p.precio)}</strong>
+          <span className="cuotas">3 cuotas sin interés de <b>{peso(p.precio / 3)}</b></span>
           {p.efectivo > 0 && <small>{peso(p.efectivo)} efectivo/transf.</small>}
         </div>
         <button className="add" onClick={() => onAdd(p)}>+ Agregar</button>
@@ -36,6 +42,13 @@ export default function App() {
   const [q, setQ] = useState('')
   const [carrito, setCarrito] = useState({})
   const [abierto, setAbierto] = useState(false)
+  const [zoom, setZoom] = useState(null)
+
+  useEffect(() => {
+    const esc = (e) => e.key === 'Escape' && setZoom(null)
+    window.addEventListener('keydown', esc)
+    return () => window.removeEventListener('keydown', esc)
+  }, [])
 
   useEffect(() => {
     cargarProductos().then((d) => { setProductos(d); setEstado('ok') }).catch(() => setEstado('error'))
@@ -87,8 +100,18 @@ export default function App() {
         {estado === 'cargando' && <p className="msg">Cargando productos...</p>}
         {estado === 'error' && <p className="msg">No pudimos cargar el catálogo. Intentá de nuevo más tarde.</p>}
         {estado === 'ok' && !visibles.length && <p className="msg">No encontramos productos 😢</p>}
-        {visibles.map((p) => <Card key={p.id} p={p} onAdd={(x) => cambiar(x, 1)} />)}
+        {visibles.map((p) => <Card key={p.id} p={p} onAdd={(x) => cambiar(x, 1)} onZoom={setZoom} />)}
       </main>
+
+      {zoom && (
+        <div className="lightbox" onClick={() => setZoom(null)}>
+          <button className="lbclose" aria-label="Cerrar">✕</button>
+          <figure onClick={(e) => e.stopPropagation()}>
+            <img src={zoom.imagen.replace('sz=w800', 'sz=w1600')} alt={zoom.nombre} />
+            <figcaption>{zoom.nombre} · {peso(zoom.precio)}</figcaption>
+          </figure>
+        </div>
+      )}
 
       <footer>© {new Date().getFullYear()} {NEGOCIO}</footer>
 
