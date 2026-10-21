@@ -43,6 +43,7 @@ export async function cargarProductos() {
   }
   const monto = (s) => Number(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0
 
+  const ahora = Date.now()
   const grupos = new Map()
   rows.forEach((r) => {
     const o = Object.fromEntries(keys.map((k, j) => [k, (r[j] || '').trim()]))
@@ -62,7 +63,7 @@ export async function cargarProductos() {
       talles: [],
     }
     if (talle && !g.talles.includes(talle)) g.talles.push(talle)
-    if (!g.imagen) g.imagen = urlImagen(col(o, 'foto', 'imagen'))
+    if (!g.imagen) g.imagen = urlImagen(col(o, 'foto', 'imagen'), col(o, 'actualiz') || ahora)
     g.stock = (g.stock || 0) + cantidad
     grupos.set(nombre, g)
   })
@@ -74,10 +75,16 @@ function categoriaDe(nombre) {
   return w.charAt(0).toUpperCase() + w.slice(1)
 }
 
-// Convierte links de Google Drive en una URL de imagen mostrable
-function urlImagen(url) {
+// Convierte links de Google Drive (/file/d/ID/view, open?id=ID, uc?id=ID, thumbnail?id=ID)
+// en una URL directa de imagen, con cache-busting (v=). Otros orígenes no se tocan.
+// `version` puede ser la fecha de actualización (columna opcional) o, si no hay, el momento de carga.
+export function urlImagen(url, version = Date.now()) {
+  if (!url) return ''
+  if (!/^https?:\/\/(drive|docs)\.google\.com\//i.test(url)) return url
   const m = url.match(/\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/)
-  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w800` : url
+  if (!m) return url
+  const v = encodeURIComponent(String(version).trim() || Date.now())
+  return `https://drive.google.com/uc?export=view&id=${m[1]}&v=${v}`
 }
 
 // Acepta el link de "compartir" de Google Sheets y lo convierte a CSV
