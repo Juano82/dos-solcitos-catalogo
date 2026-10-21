@@ -107,7 +107,7 @@ export default function App() {
         <div className="lightbox" onClick={() => setZoom(null)}>
           <button className="lbclose" aria-label="Cerrar">✕</button>
           <figure onClick={(e) => e.stopPropagation()}>
-            <img src={zoom.imagen.replace('sz=w800', 'sz=w1600')} alt={zoom.nombre} />
+            <img src={zoom.imagen} alt={zoom.nombre} />
             <figcaption>{zoom.nombre} · {peso(zoom.precio)}</figcaption>
           </figure>
         </div>
