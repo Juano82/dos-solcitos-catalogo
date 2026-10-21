@@ -37,32 +37,35 @@ export async function cargarProductos() {
   if (!res.ok) throw new Error('No se pudo leer la hoja')
   const [head, ...rows] = parseCSV(await res.text())
   const keys = head.map((h) => h.trim().toLowerCase())
-  const col = (o, ...prefijos) => {
-    const k = keys.find((x) => prefijos.some((p) => x.startsWith(p)))
-    return k ? o[k] : ''
+  const col = (row, ...prefijos) => {
+    for (let i = 0; i < keys.length; i++) {
+      if (!prefijos.some((p) => keys[i].startsWith(p))) continue
+      const value = (row[i] || '').trim()
+      if (value) return value
+    }
+    return ''
   }
   const monto = (s) => Number(String(s).replace(/[^\d,]/g, '').replace(',', '.')) || 0
 
   const grupos = new Map()
   rows.forEach((r) => {
-    const o = Object.fromEntries(keys.map((k, j) => [k, (r[j] || '').trim()]))
-    const nombre = col(o, 'descripcion', 'nombre').replace(/\s+/g, ' ')
+    const nombre = col(r, 'descripcion', 'nombre').replace(/\s+/g, ' ')
     // Las filas con observación (VENDIDO, cambio/falla) no se muestran
-    if (!nombre || col(o, 'observacion')) return
-    const cantidad = Number(col(o, 'cantidad')) || 1
-    const talle = col(o, 'talle')
+    if (!nombre || col(r, 'observacion')) return
+    const cantidad = Number(col(r, 'cantidad')) || 1
+    const talle = col(r, 'talle')
     const g = grupos.get(nombre) || {
       id: grupos.size,
       nombre,
       categoria: categoriaDe(nombre),
-      precio: monto(col(o, 'precio de venta')),
-      efectivo: monto(col(o, 'precio efectivo')),
+      precio: monto(col(r, 'precio de venta')),
+      efectivo: monto(col(r, 'precio efectivo')),
       imagen: '',
       descripcion: '',
       talles: [],
     }
     if (talle && !g.talles.includes(talle)) g.talles.push(talle)
-    if (!g.imagen) g.imagen = urlImagen(col(o, 'foto', 'imagen'))
+    if (!g.imagen) g.imagen = urlImagen(col(r, 'foto', 'imagen'))
     g.stock = (g.stock || 0) + cantidad
     grupos.set(nombre, g)
   })
