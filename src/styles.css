@@ -40,6 +40,13 @@ button { font: inherit; cursor: pointer; border: 0; }
 .lightbox img { max-width: 100%; max-height: 82vh; border-radius: 16px; object-fit: contain; }
 .lightbox figcaption { color: #fff; font-weight: 700; text-align: center; }
 .lbclose { position: absolute; top: 16px; right: 16px; width: 42px; height: 42px; border-radius: 50%; background: #fff; font-size: 1.1rem; }
+.lbmain { position: relative; display: flex; align-items: center; justify-content: center; max-width: 100%; }
+.lbnav { position: absolute; top: 50%; transform: translateY(-50%); width: 42px; height: 42px; border-radius: 50%; background: #fffd; font-size: 1.8rem; line-height: 1; }
+.lbnav.prev { left: 8px; }
+.lbnav.next { right: 8px; }
+.lightbox .lbthumbs { display: flex; gap: 8px; max-width: 100%; overflow-x: auto; }
+.lightbox .lbthumbs img { width: 56px; height: 56px; max-height: none; border-radius: 10px; object-fit: cover; cursor: pointer; opacity: .6; border: 2px solid transparent; }
+.lightbox .lbthumbs img.on { opacity: 1; border-color: #fff; }
 @keyframes fade { from { opacity: 0 } }
 .thumb em { position: absolute; top: 12px; left: 12px; font: 700 .75rem Nunito; color: #fff; padding: 4px 12px; border-radius: 99px; }
 .info { padding: 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }

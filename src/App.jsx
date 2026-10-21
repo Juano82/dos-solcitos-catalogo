@@ -43,6 +43,10 @@ export default function App() {
   const [carrito, setCarrito] = useState({})
   const [abierto, setAbierto] = useState(false)
   const [zoom, setZoom] = useState(null)
+  const [fotoIdx, setFotoIdx] = useState(0)
+  const abrirZoom = (p) => { setFotoIdx(0); setZoom(p) }
+  const fotos = zoom ? (zoom.imagenes?.length ? zoom.imagenes : [zoom.imagen]) : []
+  const mover = (d) => setFotoIdx((i) => (i + d + fotos.length) % fotos.length)
 
   useEffect(() => {
     const esc = (e) => e.key === 'Escape' && setZoom(null)
@@ -100,14 +104,25 @@ export default function App() {
         {estado === 'cargando' && <p className="msg">Cargando productos...</p>}
         {estado === 'error' && <p className="msg">No pudimos cargar el catálogo. Intentá de nuevo más tarde.</p>}
         {estado === 'ok' && !visibles.length && <p className="msg">No encontramos productos 😢</p>}
-        {visibles.map((p) => <Card key={p.id} p={p} onAdd={(x) => cambiar(x, 1)} onZoom={setZoom} />)}
+        {visibles.map((p) => <Card key={p.id} p={p} onAdd={(x) => cambiar(x, 1)} onZoom={abrirZoom} />)}
       </main>
 
       {zoom && (
         <div className="lightbox" onClick={() => setZoom(null)}>
           <button className="lbclose" aria-label="Cerrar">✕</button>
           <figure onClick={(e) => e.stopPropagation()}>
-            <img src={zoom.imagen.replace('sz=w800', 'sz=w1600')} alt={zoom.nombre} />
+            <div className="lbmain">
+              {fotos.length > 1 && <button className="lbnav prev" aria-label="Anterior" onClick={() => mover(-1)}>‹</button>}
+              <img src={fotos[fotoIdx].replace('sz=w800', 'sz=w1600')} alt={zoom.nombre} />
+              {fotos.length > 1 && <button className="lbnav next" aria-label="Siguiente" onClick={() => mover(1)}>›</button>}
+            </div>
+            {fotos.length > 1 && (
+              <div className="lbthumbs">
+                {fotos.map((f, i) => (
+                  <img key={f} src={f} alt={`${zoom.nombre} ${i + 1}`} className={i === fotoIdx ? 'on' : ''} onClick={() => setFotoIdx(i)} />
+                ))}
+              </div>
+            )}
             <figcaption>{zoom.nombre} · {peso(zoom.precio)}</figcaption>
           </figure>
         </div>

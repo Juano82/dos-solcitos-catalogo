@@ -61,11 +61,17 @@ export async function cargarProductos() {
       precio: monto(col(r, 'precio de venta')),
       efectivo: monto(col(r, 'precio efectivo')),
       imagen: '',
+      imagenes: [],
       descripcion: '',
       talles: [],
     }
     if (talle && !g.talles.includes(talle)) g.talles.push(talle)
-    if (!g.imagen) g.imagen = urlImagen(col(r, 'foto', 'imagen'))
+    keys.forEach((k, i) => {
+      if (!/^(foto|imagen)/.test(k)) return
+      const u = urlImagen((r[i] || '').trim())
+      if (u && !g.imagenes.includes(u)) g.imagenes.push(u)
+    })
+    g.imagen = g.imagenes[0] || ''
     g.stock = (g.stock || 0) + cantidad
     grupos.set(nombre, g)
   })
