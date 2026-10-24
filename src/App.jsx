@@ -456,27 +456,14 @@ export default function App() {
 
   return (
     <div className="storefront">
-      <header className="topbar">
-        <a className="brand" href="./" aria-label={NEGOCIO}>
-          <img src="./logo.png" alt={`${NEGOCIO} Indumentaria`} />
-        </a>
-        <div className="header-actions">
-          <button
-            className="header-link"
-            type="button"
-            onClick={() => document.getElementById('beneficios')?.scrollIntoView({ behavior: 'smooth' })}
-          >
-            ✨ <span>Cómo comprar</span>
-          </button>
+      <section className="hero">
+        <div className="hero-actions">
           <button className="cart-button" type="button" onClick={() => setCarritoAbierto(true)}>
             <span aria-hidden="true">🛒</span>
             <span>Pedido</span>
             <b>{cantidadEnCarrito}</b>
           </button>
         </div>
-      </header>
-
-      <section className="hero">
         <img className="hero-logo" src="./logo.png" alt={`${NEGOCIO} Indumentaria`} />
         <h1>Ropa para <span>bebés, niños y niñas</span></h1>
         <p>Elegí tus favoritos y hacé tu pedido por WhatsApp en un minuto.</p>
