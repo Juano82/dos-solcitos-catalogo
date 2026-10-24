@@ -189,7 +189,7 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
             <span>Efectivo / Transferencia</span>
           </div>
           <div className="list-price">
-            Lista: <b className={producto.efectivo < producto.precio ? 'discounted' : ''}>{peso(producto.precio)}</b>
+            Lista: <b>{peso(producto.precio)}</b>
           </div>
           <p className="installments">
             3 cuotas de <b>{peso(producto.cuotas3 || Math.round(producto.precio / 3))}</b>

@@ -700,10 +700,6 @@ textarea:focus-visible,
   font-size: 0.73rem;
 }
 
-.list-price b.discounted {
-  text-decoration: line-through;
-}
-
 .installments {
   grid-column: 1 / -1;
   margin: 0;
