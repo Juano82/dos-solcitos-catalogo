@@ -59,9 +59,10 @@ textarea:focus-visible,
 }
 
 .hero-actions {
-  position: absolute;
-  top: 18px;
+  position: fixed;
   right: max(5vw, 20px);
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 40;
   display: flex;
   align-items: center;
 }
@@ -1442,8 +1443,8 @@ textarea:focus-visible,
 
 @media (max-width: 640px) {
   .hero-actions {
-    position: static;
-    align-self: flex-end;
+    right: 14px;
+    bottom: max(14px, env(safe-area-inset-bottom));
   }
 
   .cart-button {
