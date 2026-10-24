@@ -224,7 +224,7 @@ export default function App() {
   const [zoom, setZoom] = useState(null)
   const [fotoIdx, setFotoIdx] = useState(0)
   const [nombreCliente, setNombreCliente] = useState('')
-  const [entrega, setEntrega] = useState('retiro')
+  const [entrega, setEntrega] = useState('domicilio')
   const [direccion, setDireccion] = useState('')
   const [pago, setPago] = useState('transferencia')
   const [nota, setNota] = useState('')
@@ -361,6 +361,7 @@ export default function App() {
         ? [...restantes, { key: producto.key, talle, cantidad }]
         : restantes
     })
+    if (delta > 0) setAviso(`${producto.nombre} (talle ${talle}) agregado al pedido.`)
   }
 
   const cambiarTalle = (linea, talleNuevo) => {
@@ -395,8 +396,8 @@ export default function App() {
   }
 
   const validarEntrega = () => {
-    if (entrega === 'domicilio' && !direccion.trim()) {
-      setAviso('Agregá la dirección para coordinar el envío.')
+    if (!direccion.trim()) {
+      setAviso('Agregá la dirección o localidad y código postal para coordinar el envío.')
       return false
     }
     return true
@@ -412,11 +413,9 @@ export default function App() {
     const pagoTexto = pago === 'transferencia'
       ? `Efectivo/transferencia (${peso(totalTransferencia)}${ahorro ? `; ahorrás ${peso(ahorro)}` : ''})`
       : `Tarjeta: 3 cuotas sin interés de ${peso(Math.round(totalLista / 3))} (total ${peso(totalLista)})`
-    const entregaTexto = entrega === 'retiro'
-      ? 'Retiro en Glew / punto de encuentro'
-      : entrega === 'domicilio'
-        ? `Envío a domicilio: ${direccion.trim()}`
-        : 'Envío por correo a coordinar'
+    const entregaTexto = entrega === 'domicilio'
+      ? `Envío a domicilio: ${direccion.trim()}`
+      : `Envío por correo: ${direccion.trim()}`
     const mensaje = [
       `Hola ${NEGOCIO}! Quiero hacer este pedido:`,
       nombreCliente.trim() ? `Nombre: ${nombreCliente.trim()}` : '',
@@ -483,7 +482,7 @@ export default function App() {
         <div className="benefit-pills" id="beneficios">
           <span><i>💳</i> 3 Cuotas</span>
           <span><i>💵</i> Descuento en Efectivo o Transferencia</span>
-          <span><i>🚚</i> Retiro en Glew & Envíos</span>
+          <span><i>🚚</i> Envíos a domicilio o por correo</span>
         </div>
       </section>
 
@@ -722,24 +721,21 @@ export default function App() {
                     <fieldset className="choice-group">
                       <legend>Forma de entrega</legend>
                       <div className="delivery-options">
-                        <button type="button" className={entrega === 'retiro' ? 'delivery-option selected' : 'delivery-option'} onClick={() => setEntrega('retiro')}>
-                          📍 Retiro
-                        </button>
                         <button type="button" className={entrega === 'domicilio' ? 'delivery-option selected' : 'delivery-option'} onClick={() => setEntrega('domicilio')}>
                           🚚 A domicilio
                         </button>
                         <button type="button" className={entrega === 'correo' ? 'delivery-option selected' : 'delivery-option'} onClick={() => setEntrega('correo')}>
-                          📦 Correo
+                          📦 Por correo
                         </button>
                       </div>
-                      {entrega === 'domicilio' && (
-                        <input
-                          className="form-input"
-                          value={direccion}
-                          onChange={(event) => setDireccion(event.target.value)}
-                          placeholder="Dirección, localidad o código postal"
-                        />
-                      )}
+                      <input
+                        className="form-input"
+                        value={direccion}
+                        onChange={(event) => setDireccion(event.target.value)}
+                        placeholder={entrega === 'domicilio'
+                          ? 'Dirección completa para el envío'
+                          : 'Localidad y código postal del envío'}
+                      />
                     </fieldset>
                     <label className="form-field">
                       Aclaraciones <span>(opcional)</span>
