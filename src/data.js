@@ -108,16 +108,15 @@ function leerTablaTalles(rows) {
     const modelo = (fila[col] || '').trim()
     if (!modelo) break
     const categoria = hayCategoria ? (fila[col + 2] || '').trim() : ''
-    tabla.push({ clave: normalizar(categoria || modelo), talles: separarTalles(fila[col + 1]) })
+    tabla.push({ clave: normalizar(categoria || modelo), modelo: modelo.charAt(0).toUpperCase() + modelo.slice(1), talles: separarTalles(fila[col + 1]) })
   }
   return tabla
 }
 
-function tallesDeClase(tabla, clase) {
+function filaDeClase(tabla, clase) {
   const c = normalizar(clase || '').trim()
   if (!c) return null
-  const hallado = tabla.find(({ clave }) => clave.startsWith(c) || c.startsWith(clave))
-  return hallado ? hallado.talles : null
+  return tabla.find(({ clave }) => clave.startsWith(c) || c.startsWith(clave)) || null
 }
 
 function parseMonto(valor) {
@@ -193,8 +192,8 @@ export async function cargarProductos() {
 
     const key = normalizar(nombre)
     const clase = colClase === -1 ? '' : fila[colClase]
-    const tallesTabla = tallesDeClase(tablaTalles, clase)
-    const tallesFila = tallesTabla || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
+    const filaTabla = filaDeClase(tablaTalles, clase)
+    const tallesFila = filaTabla?.talles || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
     const cantidad = colCantidad === -1 ? 1 : parseCantidad(fila[colCantidad])
     const precio = colPrecio === -1 ? 0 : parseMonto(fila[colPrecio])
     const efectivo = colEfectivo === -1 ? 0 : parseMonto(fila[colEfectivo])
@@ -206,7 +205,7 @@ export async function cargarProductos() {
         key,
         codigo: colCodigo === -1 ? '' : (fila[colCodigo] || '').trim(),
         nombre,
-        categoria: categoriaDe(nombre),
+        categoria: filaTabla?.modelo || categoriaDe(nombre),
         precio,
         efectivo: efectivo || precio,
         imagen: '',

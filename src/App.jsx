@@ -18,6 +18,13 @@ const EMOJIS = {
   Pantalones: '👖',
   Abrigos: '🧥',
   Vestidos: '👗',
+  Bodys: '🍼',
+  Jardineros: '👖',
+  'Shorts baño': '🩳',
+  'Ajuar RN': '👶',
+  Baberos: '🧷',
+  'Pantalon Pañalero': '👖',
+  Chomba: '👕',
 }
 
 const peso = (valor) =>
