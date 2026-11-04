@@ -205,7 +205,7 @@ export async function cargarProductos() {
         key,
         codigo: colCodigo === -1 ? '' : (fila[colCodigo] || '').trim(),
         nombre,
-        categoria: filaTabla?.modelo || categoriaDe(nombre),
+        categoria: filaTabla?.modelo || (clase || '').trim() || categoriaDe(nombre),
         precio,
         efectivo: efectivo || precio,
         imagen: '',

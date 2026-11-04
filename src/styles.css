@@ -238,27 +238,22 @@ textarea:focus-visible,
 
 .filter-top-row {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
+  gap: 10px 15px;
 }
 
 .filter-chips,
 .size-filter-options {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.filter-chips::-webkit-scrollbar,
-.size-filter-options::-webkit-scrollbar {
-  display: none;
 }
 
 .filter-chips {
-  flex: 1;
+  flex: 1 1 100%;
   min-width: 0;
   padding: 1px 2px 5px;
 }
@@ -324,10 +319,10 @@ textarea:focus-visible,
 
 .size-filter {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 7px;
   min-width: 0;
-  overflow: hidden;
 }
 
 .size-filter > b {

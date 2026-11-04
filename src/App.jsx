@@ -54,6 +54,14 @@ function leerCarrito() {
   }
 }
 
+function ordenTalle(talle) {
+  const t = talle.toUpperCase().trim()
+  if (t === 'NB' || t === 'RN') return 0
+  const n = parseInt(t, 10)
+  if (Number.isNaN(n)) return 1000
+  return t.endsWith('M') ? n : 100 + n
+}
+
 function stockDe(producto, talle) {
   return Math.max(0, Number(producto.stockPorTalle?.[talle] || 0))
 }
@@ -314,7 +322,7 @@ export default function App() {
       'Todos',
       ...Array.from(new Set(productos.flatMap((producto) =>
         producto.talles.filter((talle) => talle !== 'Único' && stockDe(producto, talle) > 0),
-      ))).sort((a, b) => a.localeCompare(b, 'es', { numeric: true })),
+      ))).sort((a, b) => ordenTalle(a) - ordenTalle(b) || a.localeCompare(b, 'es', { numeric: true })),
     ],
     [productos],
   )
