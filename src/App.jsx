@@ -57,6 +57,10 @@ function tallesProducto(producto) {
     return { todos: disponibles, disponibles }
   }
 
+  if (producto.tallesCatalogo) {
+    return { todos: [...new Set([...producto.tallesCatalogo, ...producto.talles])], disponibles }
+  }
+
   const esBebe = producto.talles.some((talle) => {
     const normalizado = talle.toUpperCase().trim()
     return normalizado === 'RN' || normalizado.endsWith('M') || normalizado.includes('-')

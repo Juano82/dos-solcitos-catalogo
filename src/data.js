@@ -89,6 +89,37 @@ function categoriaDe(nombre) {
   return 'Prendas'
 }
 
+function separarTalles(valor) {
+  const texto = String(valor || '').trim()
+  if (/^talle\s+[uú]nico$/i.test(texto) || !texto) return ['Único']
+  return texto.split(/[-,]/).map((t) => t.trim()).filter(Boolean)
+}
+
+// Tabla de la hoja (columnas R:S, opcional T): modelo | talles disponibles | categoria
+function leerTablaTalles(rows) {
+  const filaHeader = rows.findIndex((fila) =>
+    fila.some((celda, i) => normalizar(celda || '').trim() === 'modelo' && /^talles/.test(normalizar(fila[i + 1] || '').trim())),
+  )
+  if (filaHeader === -1) return []
+  const col = rows[filaHeader].findIndex((celda) => normalizar(celda || '').trim() === 'modelo')
+  const hayCategoria = normalizar(rows[filaHeader][col + 2] || '').trim().startsWith('categoria')
+  const tabla = []
+  for (const fila of rows.slice(filaHeader + 1)) {
+    const modelo = (fila[col] || '').trim()
+    if (!modelo) break
+    const categoria = hayCategoria ? (fila[col + 2] || '').trim() : ''
+    tabla.push({ clave: normalizar(categoria || modelo), talles: separarTalles(fila[col + 1]) })
+  }
+  return tabla
+}
+
+function tallesDeClase(tabla, clase) {
+  const c = normalizar(clase || '').trim()
+  if (!c) return null
+  const hallado = tabla.find(({ clave }) => clave.startsWith(c) || c.startsWith(clave))
+  return hallado ? hallado.talles : null
+}
+
 function parseMonto(valor) {
   const limpio = String(valor || '').replace(/[^\d,.-]/g, '')
   if (!limpio) return 0
@@ -138,6 +169,8 @@ export async function cargarProductos() {
   )
   const colDescripcion = indice('descripcion', 'nombre', 'articulo')
   const colTalle = indice('talle')
+  const colClase = indice('clase')
+  const tablaTalles = leerTablaTalles(rows)
   const colCodigo = indice('codigo', 'cod')
   const colPrecio = indice('precio de venta', 'precio lista')
   const colEfectivo = indice('precio efectivo', 'efectivo', 'transferencia')
@@ -159,7 +192,9 @@ export async function cargarProductos() {
     if (!nombre || /\b(vendido|baja|falla|cambio)\b/i.test(observacion)) return
 
     const key = normalizar(nombre)
-    const talle = colTalle === -1 ? 'Único' : (fila[colTalle] || '').trim() || 'Único'
+    const clase = colClase === -1 ? '' : fila[colClase]
+    const tallesTabla = tallesDeClase(tablaTalles, clase)
+    const tallesFila = tallesTabla || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
     const cantidad = colCantidad === -1 ? 1 : parseCantidad(fila[colCantidad])
     const precio = colPrecio === -1 ? 0 : parseMonto(fila[colPrecio])
     const efectivo = colEfectivo === -1 ? 0 : parseMonto(fila[colEfectivo])
@@ -178,14 +213,17 @@ export async function cargarProductos() {
         imagenes: [],
         descripcion: '',
         talles: [],
+        tallesCatalogo: null,
         stock: 0,
         stockPorTalle: {},
       }
     }
 
-    if (!producto.talles.includes(talle)) producto.talles.push(talle)
-    producto.stockPorTalle[talle] = (producto.stockPorTalle[talle] || 0) + cantidad
-    producto.stock += cantidad
+    tallesFila.forEach((talle) => {
+      if (!producto.talles.includes(talle)) producto.talles.push(talle)
+      producto.stockPorTalle[talle] = (producto.stockPorTalle[talle] || 0) + cantidad
+      producto.stock += cantidad
+    })
 
     columnasImagen.forEach((column) => {
       const rawUrl = (fila[column] || '').trim()
