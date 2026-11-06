@@ -34,6 +34,11 @@ const peso = (valor) =>
     maximumFractionDigits: 0,
   })
 
+const formatearCodigo = (codigo) => {
+  const coincidencia = String(codigo || '').trim().match(/^COD\s*:?\s*(\d+)$/i)
+  return coincidencia ? `COD: ${coincidencia[1].padStart(4, '0')}` : codigo
+}
+
 function leerCarrito() {
   try {
     const guardado = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || '[]')
@@ -134,7 +139,7 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
         )}
         <div className="product-image-tags">
           <span className="category-label">{EMOJIS[producto.categoria] || '✨'} {producto.categoria}</span>
-          {producto.codigo && <span className="product-code">{producto.codigo}</span>}
+          {producto.codigo && <span className="product-code">{formatearCodigo(producto.codigo)}</span>}
         </div>
         {imagenes.length > 1 && (
           <div className="photo-dots" aria-label="Fotos del producto">

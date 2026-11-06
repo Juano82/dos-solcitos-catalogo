@@ -111,6 +111,16 @@ textarea:focus-visible,
   border-bottom: 1px solid rgb(254 215 170 / 55%);
 }
 
+@media (min-width: 901px) {
+  .hero {
+    padding-block: 28px 24px;
+  }
+
+  .product-image {
+    aspect-ratio: 4 / 3;
+  }
+}
+
 .hero-logo {
   display: block;
   width: auto;
