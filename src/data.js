@@ -201,8 +201,11 @@ export async function cargarProductos() {
     const key = normalizar(nombre)
     const clase = colClase === -1 ? '' : fila[colClase]
     const filaTabla = filaDeClase(tablaTalles, clase)
+    const tallesEnFila = columnasTalles.filter(({ columna }) =>
+      String(fila[columna] ?? '').trim() !== '',
+    )
     const tallesFila = columnasTalles.length
-      ? columnasTalles.filter(({ columna }) => talleMarcado(fila[columna])).map(({ talle }) => talle)
+      ? tallesEnFila.filter(({ columna }) => talleMarcado(fila[columna])).map(({ talle }) => talle)
       : filaTabla?.talles || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
     const cantidad = colCantidad === -1 ? 1 : parseCantidad(fila[colCantidad])
     const precio = colPrecio === -1 ? 0 : parseMonto(fila[colPrecio])
@@ -222,10 +225,16 @@ export async function cargarProductos() {
         imagenes: [],
         descripcion: '',
         talles: [],
-        tallesCatalogo: columnasTalles.length ? columnasTalles.map(({ talle }) => talle) : null,
+        tallesCatalogo: columnasTalles.length ? [] : null,
         stock: 0,
         stockPorTalle: {},
       }
+    }
+
+    if (producto.tallesCatalogo) {
+      tallesEnFila.forEach(({ talle }) => {
+        if (!producto.tallesCatalogo.includes(talle)) producto.tallesCatalogo.push(talle)
+      })
     }
 
     tallesFila.forEach((talle) => {
