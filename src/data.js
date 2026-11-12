@@ -141,6 +141,10 @@ function parseCantidad(valor) {
   return Number.isFinite(numero) ? Math.max(0, numero) : 1
 }
 
+function talleMarcado(valor) {
+  return /^(true|1|si|sí|yes|x|✓|✔|☑)$/i.test(String(valor || '').trim())
+}
+
 function urlImagen(url) {
   const match = url.match(/\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/)
   return match ? `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800` : url
@@ -175,6 +179,10 @@ export async function cargarProductos() {
   const colEfectivo = indice('precio efectivo', 'efectivo', 'transferencia')
   const colCantidad = indice('cantidad', 'stock')
   const colObservacion = indice('observacion')
+  const columnasTalles = headers.flatMap((header, columna) => {
+    if (columna < 5 || columna > 15 || !header) return []
+    return [{ columna, talle: rows[0][columna].replace(/^\uFEFF/, '').trim() }]
+  })
   const columnasImagen = headers
     .map((header, index) => (/^(foto|imagen)/.test(header) ? index : -1))
     .filter((index) => index !== -1)
@@ -193,7 +201,9 @@ export async function cargarProductos() {
     const key = normalizar(nombre)
     const clase = colClase === -1 ? '' : fila[colClase]
     const filaTabla = filaDeClase(tablaTalles, clase)
-    const tallesFila = filaTabla?.talles || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
+    const tallesFila = columnasTalles.length
+      ? columnasTalles.filter(({ columna }) => talleMarcado(fila[columna])).map(({ talle }) => talle)
+      : filaTabla?.talles || (colTalle === -1 ? ['Único'] : separarTalles(fila[colTalle]))
     const cantidad = colCantidad === -1 ? 1 : parseCantidad(fila[colCantidad])
     const precio = colPrecio === -1 ? 0 : parseMonto(fila[colPrecio])
     const efectivo = colEfectivo === -1 ? 0 : parseMonto(fila[colEfectivo])
@@ -212,7 +222,7 @@ export async function cargarProductos() {
         imagenes: [],
         descripcion: '',
         talles: [],
-        tallesCatalogo: null,
+        tallesCatalogo: columnasTalles.length ? columnasTalles.map(({ talle }) => talle) : null,
         stock: 0,
         stockPorTalle: {},
       }
