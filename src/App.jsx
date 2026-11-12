@@ -94,7 +94,9 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
     () => tallesProducto(producto),
     [producto],
   )
-  const [talleSeleccionado, setTalleSeleccionado] = useState(tallesDisponibles[0] || '')
+  const [talleSeleccionado, setTalleSeleccionado] = useState(
+    tallesDisponibles[0] || todosLosTalles[0] || '',
+  )
   const [fotoActiva, setFotoActiva] = useState(0)
   const [fotosRotas, setFotosRotas] = useState({})
   const [agregado, setAgregado] = useState(false)
@@ -102,12 +104,13 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
   const imagenes = producto.imagenes?.length ? producto.imagenes : (producto.imagen ? [producto.imagen] : [])
   const imagen = imagenes[fotoActiva]
   const imagenRota = Boolean(fotosRotas[fotoActiva])
+  const tallePorPedido = Boolean(talleSeleccionado) && stockDe(producto, talleSeleccionado) === 0
 
   useEffect(() => {
-    if (!tallesDisponibles.includes(talleSeleccionado)) {
-      setTalleSeleccionado(tallesDisponibles[0] || '')
+    if (!todosLosTalles.includes(talleSeleccionado)) {
+      setTalleSeleccionado(tallesDisponibles[0] || todosLosTalles[0] || '')
     }
-  }, [producto.key, tallesDisponibles, talleSeleccionado])
+  }, [producto.key, tallesDisponibles, talleSeleccionado, todosLosTalles])
 
   const agregar = () => {
     if (!talleSeleccionado) return
@@ -119,7 +122,7 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
   return (
     <article className="product-card">
       <div
-        className={`product-image ${imagen && !imagenRota ? 'is-zoomable' : ''}`}
+        className={`product-image ${imagen && !imagenRota ? 'is-zoomable' : ''} ${tallePorPedido ? 'is-on-request' : ''}`}
         onClick={() => imagen && !imagenRota && onZoom(producto)}
         style={{ backgroundColor: `${color}20` }}
       >
@@ -137,6 +140,7 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
             <small>Foto no disponible</small>
           </div>
         )}
+        {tallePorPedido && <span className="on-request-label">POR PEDIDO</span>}
         <div className="product-image-tags">
           <span className="category-label">{EMOJIS[producto.categoria] || '✨'} {producto.categoria}</span>
           {producto.codigo && <span className="product-code">{formatearCodigo(producto.codigo)}</span>}
@@ -189,9 +193,8 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
                 <button
                   key={talle}
                   type="button"
-                  disabled={!disponible}
                   aria-pressed={talleSeleccionado === talle}
-                  title={disponible ? `Elegir talle ${talle}` : `Talle ${talle} agotado`}
+                  title={disponible ? `Elegir talle ${talle}` : `Pedir talle ${talle}`}
                   className={`size-option ${talleSeleccionado === talle ? 'selected' : ''} ${!disponible ? 'unavailable' : ''}`}
                   onClick={() => setTalleSeleccionado(talle)}
                 >
@@ -199,11 +202,10 @@ function TarjetaProducto({ producto, onAgregar, onZoom }) {
                 </button>
               )
             })}
-            {producto.talles.length === 0 && <span className="out-of-stock">Sin talles cargados</span>}
           </div>
           <div className="size-legend">
             <span><i /> Disponibles</span>
-            <span><s>Tachado</s> = Sin stock</span>
+            <span>En gris = Por pedido</span>
           </div>
         </div>
 
@@ -373,7 +375,7 @@ export default function App() {
     const limite = stockDe(producto, talle)
     const key = `${producto.key}::${talle}`
     const actual = carrito.find((linea) => `${linea.key}::${linea.talle}` === key)?.cantidad || 0
-    if (delta > 0 && actual >= limite) {
+    if (delta > 0 && limite > 0 && actual >= limite) {
       setAviso(`No hay más stock del talle ${talle}.`)
       return
     }
@@ -381,18 +383,21 @@ export default function App() {
     setCarrito((lineas) => {
       const cantidad = (lineas.find((linea) => `${linea.key}::${linea.talle}` === key)?.cantidad || 0) + delta
       const restantes = lineas.filter((linea) => `${linea.key}::${linea.talle}` !== key)
-      return cantidad > 0 && cantidad <= limite
+      return cantidad > 0 && (limite === 0 || cantidad <= limite)
         ? [...restantes, { key: producto.key, talle, cantidad }]
         : restantes
     })
-    if (delta > 0) setAviso(`${producto.nombre} (talle ${talle}) agregado al pedido.`)
+    if (delta > 0) {
+      const modalidad = limite === 0 ? ' agregado por pedido.' : ' agregado al pedido.'
+      setAviso(`${producto.nombre} (talle ${talle})${modalidad}`)
+    }
   }
 
   const cambiarTalle = (linea, talleNuevo) => {
-    if (linea.talle === talleNuevo || stockDe(linea.producto, talleNuevo) <= 0) return
+    if (linea.talle === talleNuevo) return
     const destinoActual = carrito.find((item) => item.key === linea.key && item.talle === talleNuevo)
     const maximo = stockDe(linea.producto, talleNuevo)
-    if (destinoActual && destinoActual.cantidad + linea.cantidad > maximo) {
+    if (maximo > 0 && (destinoActual?.cantidad || 0) + linea.cantidad > maximo) {
       setAviso(`Ajustamos la cantidad al stock disponible del talle ${talleNuevo}.`)
     }
     setCarrito((lineas) => {
@@ -401,10 +406,8 @@ export default function App() {
       const origen = lineas.find((item) => `${item.key}::${item.talle}` === origenId)
       if (!origen) return lineas
       const destino = lineas.find((item) => `${item.key}::${item.talle}` === destinoId)
-      const cantidad = Math.min(
-        origen.cantidad + (destino?.cantidad || 0),
-        stockDe(linea.producto, talleNuevo),
-      )
+      const cantidadTotal = origen.cantidad + (destino?.cantidad || 0)
+      const cantidad = maximo > 0 ? Math.min(cantidadTotal, maximo) : cantidadTotal
       return [
         ...lineas.filter((item) => {
           const id = `${item.key}::${item.talle}`
@@ -432,7 +435,8 @@ export default function App() {
       const precio = pago === 'transferencia'
         ? item.producto.efectivo || item.producto.precio
         : item.producto.precio
-      return `• ${item.cantidad} x ${item.producto.nombre} — talle ${item.talle}: ${peso(precio * item.cantidad)}`
+      const modalidad = stockDe(item.producto, item.talle) === 0 ? ' (POR PEDIDO)' : ''
+      return `• ${item.cantidad} x ${item.producto.nombre} — talle ${item.talle}${modalidad}: ${peso(precio * item.cantidad)}`
     }).join('\n')
     const pagoTexto = pago === 'transferencia'
       ? `Efectivo/transferencia (${peso(totalTransferencia)}${ahorro ? `; ahorrás ${peso(ahorro)}` : ''})`
@@ -681,9 +685,11 @@ export default function App() {
                                 value={item.talle}
                                 onChange={(event) => cambiarTalle(item, event.target.value)}
                               >
-                                {item.producto.talles
-                                  .filter((talle) => stockDe(item.producto, talle) > 0)
-                                  .map((talle) => <option key={talle} value={talle}>{talle}</option>)}
+                                {tallesProducto(item.producto).todos.map((talle) => (
+                                  <option key={talle} value={talle}>
+                                    {talle}{stockDe(item.producto, talle) === 0 ? ' (Por pedido)' : ''}
+                                  </option>
+                                ))}
                               </select>
                             </label>
                             <div className="cart-line-bottom">
@@ -700,7 +706,7 @@ export default function App() {
                                 <button
                                   type="button"
                                   aria-label="Sumar una unidad"
-                                  disabled={item.cantidad >= stock}
+                                  disabled={stock > 0 && item.cantidad >= stock}
                                   onClick={() => actualizarCantidad(item.producto, item.talle, 1)}
                                 >
                                   +
